@@ -1,39 +1,37 @@
 'use client';
 export const dynamic = 'force-dynamic';
 
-import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
+import { AuthContext } from '@/context/AuthContext';
+import { db } from '../../../../lib/firebase/config'; // Düzeltilmiş yol
 import { doc, getDoc } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Tip tanımlamaları
 interface Wishlist {
   id: string;
-  name?: string;
+  title?: string;
   ownerId?: string;
-  // Diğer alanlar eklenebilir
+  coverImageUrl?: string;
+}
+
+interface WishlistOwner {
+    username?: string;
+    avatarUrl?: string;
 }
 
 export default function WishlistDetailPage() {
   const params = useParams();
   const wishlistId = params?.id;
-  const { user, loading: authLoading } = useAuth();
 
-  const [wishlist, setWishlist] = useState<Wishlist | null>(null);
+  const [wishlist, setWishlist] = useState<Wishlist | null>(null); // 'anull' hatası düzeltildi
+  const [owner, setOwner] = useState<WishlistOwner | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (authLoading) return;
-
-    if (!user) {
-        setError("You must be logged in to view this page.");
-        setLoading(false);
-        return;
-    }
-
     if (!wishlistId) {
       setLoading(false);
       setError("Wishlist ID not found.");
@@ -46,7 +44,17 @@ export default function WishlistDetailPage() {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setWishlist({ id: docSnap.id, ...docSnap.data() } as Wishlist);
+          const wishlistData = { id: docSnap.id, ...docSnap.data() } as Wishlist;
+          setWishlist(wishlistData);
+
+           // Fetch owner data
+           if (wishlistData.ownerId) {
+            const ownerRef = doc(db, 'users', wishlistData.ownerId);
+            const ownerSnap = await getDoc(ownerRef);
+            if (ownerSnap.exists()) {
+              setOwner(ownerSnap.data() as WishlistOwner);
+            }
+          }
         } else {
           setError('Wishlist not found.');
         }
@@ -59,9 +67,9 @@ export default function WishlistDetailPage() {
     };
 
     fetchWishlist();
-  }, [wishlistId, user, authLoading]);
+  }, [wishlistId]);
 
-  if (loading || authLoading) {
+  if (loading) {
     return <div className="text-center py-10">Loading...</div>;
   }
 
@@ -71,12 +79,13 @@ export default function WishlistDetailPage() {
 
   return (
     <div>
-      <Link href="/dashboard/wishlists" className="text-sm hover:underline mb-4 block">
+      <Link href="/dashboard/wishlist" className="text-sm hover:underline mb-4 block">
         &larr; Back to Wishlists
       </Link>
       <div className="bg-card p-6 rounded-lg shadow">
-        <h1 className="text-2xl font-bold">{wishlist?.name || 'Wishlist Details'}</h1>
+        <h1 className="text-2xl font-bold">{wishlist?.title || 'Wishlist Details'}</h1>
         <p className="text-muted-foreground">Wishlist ID: {wishlist?.id}</p>
+        {owner?.username && <p className="text-sm">Created by: {owner.username}</p>}
       </div>
     </div>
   );

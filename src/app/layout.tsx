@@ -1,33 +1,33 @@
 'use client';
 
-import type {Metadata} from 'next';
-import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
 import { Inter } from 'next/font/google';
+import './globals.css';
+import { Toaster } from '@/components/ui/toaster';
+import { Header } from '@/components/layout/Header'; // Doğru yol
+import { Footer } from '@/components/layout/Footer'; // Doğru yol
+import { AuthProvider } from '@/context/AuthContext';
 import { usePathname } from 'next/navigation';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/layout/Footer';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const pathname = usePathname();
   const hideOnPaths = ['/login', '/signup'];
   const showPublicLayout = !hideOnPaths.includes(pathname) && !pathname.startsWith('/dashboard');
 
   return (
-    <html lang="en" className={`${inter.variable}`}>
-      <body className="antialiased flex flex-col min-h-screen">
-        {showPublicLayout && <Header />}
-        <main className="flex-grow flex flex-col">
-          {children}
-        </main>
-        {showPublicLayout && <Footer />}
-        <Toaster />
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <AuthProvider>
+          {showPublicLayout && <Header />}
+          <main className="flex-grow">{children}</main> {/* Eklendi: main içeriğin büyümesini sağlar */}
+          {showPublicLayout && <Footer />}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
