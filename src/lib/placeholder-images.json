@@ -1,0 +1,10 @@
+{
+  "profileAvatar": {
+    "template": "https://picsum.photos/seed/{seed}/200/200",
+    "seed": "user.uid"
+  },
+  "wishlistCover": {
+    "template": "https://picsum.photos/seed/{seed}/600/400",
+    "seed": "wishlist.name"
+  }
+}
