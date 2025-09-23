@@ -1,6 +1,5 @@
 'use client';
 export const dynamic = 'force-dynamic';
-'use client';
 
 import { PlusCircle, ListPlus, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
