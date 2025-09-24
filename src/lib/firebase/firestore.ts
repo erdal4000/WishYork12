@@ -65,7 +65,12 @@ export const subscribeToUserWishlists = (
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const wishlists: Wishlist[] = [];
     querySnapshot.forEach((doc) => {
-      wishlists.push({ id: doc.id, ...doc.data() } as Wishlist);
+      const data = doc.data();
+      wishlists.push({
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null
+      } as Wishlist);
     });
     callback(wishlists);
   });

@@ -40,14 +40,20 @@ const privacyText = {
 }
 
 export function WishlistCard({ wishlist }: WishlistCardProps) {
+
   // Placeholder values
   const itemsCount = 0;
   const fulfilledCount = 0;
   const progress = itemsCount > 0 ? (fulfilledCount / itemsCount) * 100 : 0;
 
+  let formattedDate: string | null = null;
+  if (wishlist.createdAt instanceof Date) {
+    formattedDate = `Created ${formatDistanceToNow(wishlist.createdAt, { addSuffix: true })}`;
+  }
+
   return (
     <Card>
-      <Link href={`/dashboard/wishlist/${wishlist.id}`} className="block rounded-t-lg">
+  <Link href={`/dashboard/wishlists/${wishlist.id}`} className="block rounded-t-lg">
         <CardHeader className="p-0">
           <div className="relative aspect-[16/9] w-full bg-muted rounded-t-lg">
             {wishlist.coverImageUrl && (
@@ -112,11 +118,11 @@ export function WishlistCard({ wishlist }: WishlistCardProps) {
                 <Share2 className="h-5 w-5" />
             </Button>
         </div>
-        {wishlist.createdAt && (
+        {wishlist.createdAt instanceof Date ? (
           <p className="text-xs text-muted-foreground">
-              Created {formatDistanceToNow(wishlist.createdAt.toDate(), { addSuffix: true })}
+            Created {formatDistanceToNow(wishlist.createdAt, { addSuffix: true })}
           </p>
-        )}
+        ) : null}
       </CardFooter>
     </Card>
   );
